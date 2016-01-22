@@ -1,0 +1,13 @@
+name: Fred (FrontendEditor)
+version: 0.1.0
+description: "Integrates the contentTools javascripts into grav to enable erontend-editing"
+icon: pencil
+author:
+  name: Ingo Hollmann
+  email: ingohollmann@gmail.com
+  url: https://www.bughunter2k.de.org
+homepage: https://github.com/bughunter2k/fred
+demo: http://demo.getgrav.org/bootstrap-skeleton/
+keywords: plugin, live edit, frontend edit, contenttolls
+bugs: https://github.com/bughunter2k/fred/issues
+license: MIT
