@@ -1,8 +1,9 @@
 <?php
 namespace Grav\Plugin;
 
-Use Grav\Common\Plugin;
-use \Grav\Common\Grav;
+use Grav\Common\Grav;
+use Grav\Common\Plugin;
+use Grav\Common\User\User;
 
 
 class FredPlugin extends Plugin
@@ -13,7 +14,7 @@ class FredPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onThemeInitialized' => ['onThemeInitialized', 0]
+            'onPluginsInitialized' => ['onPluginsInitialized', 0]
         ];
     }
 
@@ -21,13 +22,34 @@ class FredPlugin extends Plugin
     /**
      * Initialize configuration
      */
-    public function onThemeInitialized()
+    public function onPluginsInitialized()
     {
-        $this->enable([
-                'onTwigSiteVariables' => ['onTwigSiteVariables', 0]
-        ]);
+        // Don't load in Admin-Backend
+        if ($this->isAdmin()) {
+            $this->active = false;
+            return;
+        }
+        $this->initializeFred();
     }
 
+    public function initializeFred() {
+        // Check for required plugins
+        if (!$this->grav['config']->get('plugins.login.enabled') ||
+            !$this->grav['config']->get('plugins.form.enabled') ) {
+            throw new \RuntimeException('One of the required plugins is missing or not enabled');
+        }
+        
+        $user = $this->grav['user'];
+        $login = $this->grav;
+        // Check on logged in user and authorization for page editing
+        if ($user->authenticated && $user->authorize("site.editor")) {
+            $this->enable([
+                'onTwigSiteVariables' => ['onTwigSiteVariables', 0]
+            ]);
+        } else {
+        }
+
+    }
 
     /**
      * if enabled on this page, load the JS + CSS and set the selectors.
