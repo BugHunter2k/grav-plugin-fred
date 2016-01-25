@@ -5,9 +5,9 @@ icon: pencil
 author:
   name: Ingo Hollmann
   email: ingohollmann@gmail.com
-  url: https://www.bughunter2k.de.org
+  url: https://www.bughunter2k.de
 homepage: https://github.com/bughunter2k/fred
-demo: http://demo.getgrav.org/bootstrap-skeleton/
+demo: Comming Soon
 keywords: plugin, live edit, frontend edit, contenttools
 bugs: https://github.com/bughunter2k/fred/issues
 license: MIT

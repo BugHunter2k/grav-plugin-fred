@@ -5,14 +5,26 @@ use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Common\User\User;
 
-
+/**
+* Grav Plugin Fred 
+* provides a frontend editor on pages
+* 
+* @author Ingo Hollmann
+* @link https://github.com/BugHunter2k/fred
+* @license http://opensource.org/licenses/MIT
+* 
+*/
 class FredPlugin extends Plugin
 {
+
+    protected $enabled=false;
+    
     /**
      * @return array
      */
     public static function getSubscribedEvents()
     {
+        // initialize when plugins are ready
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0]
         ];
@@ -32,6 +44,11 @@ class FredPlugin extends Plugin
         $this->initializeFred();
     }
 
+    /**
+    * Initialize Fred 
+    * Check for user-auth and access befor 
+    * loading js an css etc.
+    */
     public function initializeFred() {
         // Check for required plugins
         if (!$this->grav['config']->get('plugins.login.enabled') ||
@@ -39,14 +56,16 @@ class FredPlugin extends Plugin
             throw new \RuntimeException('One of the required plugins is missing or not enabled');
         }
         
-        $user = $this->grav['user'];
-        $login = $this->grav;
         // Check on logged in user and authorization for page editing
+        $user = $this->grav['user'];
         if ($user->authenticated && $user->authorize("site.editor")) {
             $this->enable([
                 'onTwigSiteVariables' => ['onTwigSiteVariables', 0]
             ]);
+            // Save plugin stauts 
+            $this->enabled = true;
         } else {
+            $this->enabled = false;
         }
 
     }
@@ -56,13 +75,18 @@ class FredPlugin extends Plugin
      */
     public function onTwigSiteVariables()
     {
-          $fredbits = array(
-          	'plugin://fred/css/content-tools.min.css',
-          	'plugin://fred/js/content-tools.min.js',
-          	'plugin://fred/js/editor.js',
-	);
-        $assets = $this->grav['assets'];
-        $assets->registerCollection('fred', $fredbits);
-        $assets->add('fred', 100);
+        // check if enabled
+        if ($this->enabled) {
+            // List of js and css files needed for contenttools
+            $fredbits = array(
+                    'plugin://fred/css/content-tools.min.css',
+                    'plugin://fred/js/content-tools.min.js',
+                    'plugin://fred/js/editor.js',
+            );
+            // register and add assets
+            $assets = $this->grav['assets'];
+            $assets->registerCollection('fred', $fredbits);
+            $assets->add('fred', 100);
+        }
     }
 }
