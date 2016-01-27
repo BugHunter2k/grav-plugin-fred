@@ -52,7 +52,8 @@ class FredPlugin extends Plugin
     public function initializeFred() {
         // Check for required plugins
         if (!$this->grav['config']->get('plugins.login.enabled') ||
-            !$this->grav['config']->get('plugins.form.enabled') ) {
+            !$this->grav['config']->get('plugins.form.enabled') ||
+            !$this->grav['config']->get('plugins.admin.enabled') ) {
             throw new \RuntimeException('One of the required plugins is missing or not enabled');
         }
         
@@ -81,7 +82,7 @@ class FredPlugin extends Plugin
             $fredbits = array(
                     'plugin://fred/css/content-tools.min.css',
                     'plugin://fred/js/content-tools.min.js',
-                    'plugin://fred/js/editor.js',
+                    'plugin://fred/js/fred.js',
             );
             // register and add assets
             $assets = $this->grav['assets'];
@@ -89,4 +90,34 @@ class FredPlugin extends Plugin
             $assets->add('fred', 100);
         }
     }
+    
+    /**
+    * Get Page informations 
+    * update content
+    * save page
+    * 
+    * @param Page Page that has to be saved
+    * @return void - calls ajaxoutput
+    */
+    public function savePage(\Grav\Common\Page\Page $page) {
+        // get local names for some objects
+        $input = $this->post;
+        $user = $this->grav['user'];
+        
+        // Check Permissions for Save
+        if ($user->authenticated && $user->authorize("site.editor")) {
+            var_dump($input);
+            // Fill content last because it also renders the output.
+            if (isset($input['content'])) {
+                $page->rawMarkdown((string) $input['content']);
+            }
+            
+        } else {
+            $this->json_response = ['status' => 'unauthorized', 'message' => 'You have insufficient permissions for editing. Make sure you logged in.'];
+            return;
+        } 
+    }
+    
+    
+    
 }
