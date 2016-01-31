@@ -15,7 +15,25 @@
         save: function(regions) {
             // callback for ContentTools for sending changes
             console.log("saving regions:", regions);
-            
+            // TODO convert ALL parts into markdown
+            // NOTE Check for changes is done by contenttools
+            var markdown = toMarkdown(regions.blog_item)
+            // Send changes to Server
+            $.ajax( {
+                url: '/fredsave.json',
+                data: {
+                    blog_item:markdown,
+                    uri: window.location.href
+                },
+                method: 'POST',
+                dataType: 'json',
+                success: function( data ) {
+                    console.log(data);
+                },
+                error: function( data ) {
+                    console.log(data);               
+                }
+            } );
             // flash an X on the screen ;)
             new ContentTools.FlashUI('no');
         }

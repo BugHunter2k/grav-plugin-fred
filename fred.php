@@ -9,6 +9,8 @@ use Grav\Common\User\User;
 * Grav Plugin Fred 
 * provides a frontend editor on pages
 * 
+* this is an early alpha!!
+* 
 * @author Ingo Hollmann
 * @link https://github.com/BugHunter2k/fred
 * @license http://opensource.org/licenses/MIT
@@ -69,8 +71,16 @@ class FredPlugin extends Plugin
             $this->enabled = false;
         }
 
+        if (
+            $this->grav['uri']->basename() == "fredsave.json"
+            && !empty($_POST) 
+            && $this->enabled
+        ) {
+            $this->savePage();
+        }
+        
     }
-
+    
     /**
      * if enabled on this page, load the JS + CSS and set the selectors.
      */
@@ -82,6 +92,7 @@ class FredPlugin extends Plugin
             $fredbits = array(
                     'plugin://fred/css/content-tools.min.css',
                     'plugin://fred/js/content-tools.min.js',
+                    'plugin://fred/js/to-markdown.js',
                     'plugin://fred/js/fred.js',
             );
             // register and add assets
@@ -99,20 +110,28 @@ class FredPlugin extends Plugin
     * @param Page Page that has to be saved
     * @return void - calls ajaxoutput
     */
-    public function savePage(\Grav\Common\Page\Page $page) {
-        // get local names for some objects
-        $input = $this->post;
+    public function savePage() {
+    
         $user = $this->grav['user'];
         
         // Check Permissions for Save
         if ($user->authenticated && $user->authorize("site.editor")) {
-            var_dump($input);
+            // TODO get page, replace content, save page
+            $uri = filter_input(INPUT_POST, "uri", FILTER_SANITIZE_SPECIAL_CHARS);
+            // TODO get correct Page, per parameter
+            $page = ""; // TODO
+            
+            $blogItem = filter_input(INPUT_POST, "blog_item", FILTER_SANITIZE_SPECIAL_CHARS);
+            
             // Fill content last because it also renders the output.
             if (isset($input['content'])) {
                 $page->rawMarkdown((string) $input['content']);
+                $page->save();
             }
-            
+            // TODO             
+            $this->json_response = ['status' => 'success', 'message' => 'Your changes has been saved'];
         } else {
+            // Non valid users should not change the article
             $this->json_response = ['status' => 'unauthorized', 'message' => 'You have insufficient permissions for editing. Make sure you logged in.'];
             return;
         } 
