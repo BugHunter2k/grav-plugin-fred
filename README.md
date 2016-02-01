@@ -1,4 +1,6 @@
 # fred
+
+[![Join the chat at https://gitter.im/BugHunter2k/fred](https://badges.gitter.im/BugHunter2k/fred.svg)](https://gitter.im/BugHunter2k/fred?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Frontend editing for Grav using contenttools or prosemirror
 
 ## Demo / Developement enviroment
