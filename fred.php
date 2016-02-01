@@ -3,6 +3,8 @@ namespace Grav\Plugin;
 
 use Grav\Common\Grav;
 use Grav\Common\Plugin;
+use Grav\Common\Page;
+use Grav\Common\Twig\Twig;
 use Grav\Common\User\User;
 
 /**
@@ -63,7 +65,8 @@ class FredPlugin extends Plugin
         $user = $this->grav['user'];
         if ($user->authenticated && $user->authorize("site.editor")) {
             $this->enable([
-                'onTwigSiteVariables' => ['onTwigSiteVariables', 0]
+                'onTwigSiteVariables' => ['onTwigSiteVariables', 0],
+                'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0]
             ]);
             // Save plugin stauts 
             $this->enabled = true;
@@ -101,6 +104,13 @@ class FredPlugin extends Plugin
             $assets->add('fred', 100);
         }
     }
+    /**
+    * register plugin template
+    */
+    public function onTwigTemplatePaths()
+    {
+        $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
+    }
     
     /**
     * Get Page informations 
@@ -116,25 +126,39 @@ class FredPlugin extends Plugin
         
         // Check Permissions for Save
         if ($user->authenticated && $user->authorize("site.editor")) {
-            // TODO get page, replace content, save page
-            $uri = filter_input(INPUT_POST, "uri", FILTER_SANITIZE_SPECIAL_CHARS);
-            // TODO get correct Page, per parameter
-            $page = ""; // TODO
+            // Get pages object and initialize
+            $pages = $this->grav['pages'];
+            $pages->init();
             
+            // Filter uri from parameters
+            $uri_string = filter_input(INPUT_POST, "uri", FILTER_SANITIZE_SPECIAL_CHARS);
+            // Parse uri to get the plain path 
+            $uri = parse_url($uri_string);
+            
+            // get the page connected with $uri.path
+            $page = $pages->dispatch($uri['path']);
+
+            // get changes
+            // TODO preapre multipage content
             $blogItem = filter_input(INPUT_POST, "blog_item", FILTER_SANITIZE_SPECIAL_CHARS);
             
-            // Fill content last because it also renders the output.
-            if (isset($input['content'])) {
-                $page->rawMarkdown((string) $input['content']);
+            // Get correct linebreaks 
+            $blogItem = html_entity_decode($blogItem, ENT_QUOTES, 'UTF-8');
+            
+            // set content and save page
+            if (!empty($blogItem)) {
+                $page->rawMarkdown((string) $blogItem);
                 $page->save();
             }
-            // TODO             
+            // Set results json
             $this->json_response = ['status' => 'success', 'message' => 'Your changes has been saved'];
         } else {
             // Non valid users should not change the article
             $this->json_response = ['status' => 'unauthorized', 'message' => 'You have insufficient permissions for editing. Make sure you logged in.'];
-            return;
-        } 
+        }
+
+        echo json_encode($this->json_response);
+        die;
     }
     
     

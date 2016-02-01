@@ -28,14 +28,20 @@
                 method: 'POST',
                 dataType: 'json',
                 success: function( data ) {
-                    console.log(data);
+                    if (data.status == "success") {
+                        // on usccess flash an checkmark on the screen ;)
+                        new ContentTools.FlashUI('ok');
+                    } else {
+                        // on error flash an X on the screen ;)
+                        new ContentTools.FlashUI('no');
+                        console.log(data);
+                    }
                 },
                 error: function( data ) {
+                    new ContentTools.FlashUI('no');
                     console.log(data);               
                 }
             } );
-            // flash an X on the screen ;)
-            new ContentTools.FlashUI('no');
         }
     }
     

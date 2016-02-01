@@ -24,3 +24,9 @@ Done
 - use login-Plugin and access:site.editor for user authentification
 - warp javascript in a closure function and autoload on jQuery-pageready 
 
+
+
+Thanks to:
+https://github.com/domchristie/to-markdown
+http://getcontenttools.com/
+https://github.com/getgrav/grav
