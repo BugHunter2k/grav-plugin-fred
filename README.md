@@ -17,7 +17,6 @@ Frontend editing for Grav using contenttools or prosemirror
  - make sure only markdown content is edited? Or what about twig content?
  - how to edit multi-language pages
  - how to edit modular pages
- - how to best/automaticaly integrate into all themes
  - how to add site.editor access to users
  - how to best login users on frontend
 
@@ -26,6 +25,7 @@ Frontend editing for Grav using contenttools or prosemirror
  
  
 ## Done
+- Using onPageProcessed Event to wrap rendered content with editable div
 - use login-Plugin and access:site.editor for user authentification
 - warp javascript in a closure function and autoload on jQuery-pageready 
 - save changes to .md file

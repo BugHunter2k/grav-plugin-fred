@@ -66,7 +66,8 @@ class FredPlugin extends Plugin
         if ($user->authenticated && $user->authorize("site.editor")) {
             $this->enable([
                 'onTwigSiteVariables' => ['onTwigSiteVariables', 0],
-                'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0]
+                'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
+                'onPageProcessed' =>  ['onPageProcessed', 0],
             ]);
             // Save plugin stauts 
             $this->enabled = true;
@@ -104,6 +105,23 @@ class FredPlugin extends Plugin
             $assets->add('fred', 100);
         }
     }
+    
+    /**
+    * Insert editor div around the active article
+    * Check for the right item and modify the content
+    * 
+    * @param Event 
+    */
+    public function onPageProcessed($e)
+    {
+        $page = $e->offsetGet('page');
+        if ($page->isPage() && $page->route() == $this->grav['uri']->path() ) {
+            $page->content('<div data-editable="true" data-name="blog_item">'.$page->content().'</div>');
+            $this->grav['debugger']->addMessage("Here we should ad a div");
+        }
+        return;
+    }
+    
     /**
     * register plugin template
     */
