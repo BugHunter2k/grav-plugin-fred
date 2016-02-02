@@ -13,6 +13,9 @@ Frontend editing for Grav using contenttools or prosemirror
 
 ## TODOs
 - decide which editor is the best
+ - http://getcontenttools.com/
+ - http://prosemirror.net/
+ - https://github.com/IonicaBizau/medium-editor-markdown
 - invesitgate
  - make sure only markdown content is edited? Or what about twig content?
  - how to edit multi-language pages
@@ -21,6 +24,7 @@ Frontend editing for Grav using contenttools or prosemirror
  - how to best login users on frontend
 
 ### Other Things
+- Issue on grav-admin https://github.com/getgrav/grav-plugin-admin/issues/173
 - Possible related: https://github.com/getgrav/grav-plugin-admin/issues/346
  
  
