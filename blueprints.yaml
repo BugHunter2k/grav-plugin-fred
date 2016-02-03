@@ -11,3 +11,16 @@ demo: Comming Soon
 keywords: plugin, live edit, frontend edit, contenttools
 bugs: https://github.com/bughunter2k/fred/issues
 license: MIT
+
+form:
+  validation: loose
+  fields:
+    allowupload:
+      type: toggle
+      label: Allow image upload
+      highlight: 1
+      default: 1
+      options: 
+          1: Enabled
+          0: Disabled
+      help: Allows the user to upload images via fred. Uploaded images are placed in the page-folder.

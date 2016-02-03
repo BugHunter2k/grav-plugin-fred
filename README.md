@@ -19,6 +19,7 @@ Frontend editing for Grav using contenttools or prosemirror
  - how to edit modular pages
  - how to add site.editor access to users
  - how to best login users on frontend
+ - allow file/image upload
 
 ### Other Things
 - Possible related: https://github.com/getgrav/grav-plugin-admin/issues/346
