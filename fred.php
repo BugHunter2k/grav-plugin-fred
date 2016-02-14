@@ -82,6 +82,13 @@ class FredPlugin extends Plugin
         ) {
             $this->savePage();
         }
+        if (
+            $this->grav['uri']->basename() == "upload-image.json"
+            && !empty($_POST) 
+            && $this->enabled
+        ) {
+            $this->addFile();
+        }
         
     }
     
@@ -117,7 +124,7 @@ class FredPlugin extends Plugin
         $page = $e->offsetGet('page');
         if ($page->isPage() && $page->route() == $this->grav['uri']->path() ) {
             $page->content('<div data-editable="true" data-name="blog_item">'.$page->content().'</div>');
-            $this->grav['debugger']->addMessage("Here we should ad a div");
+            $this->grav['debugger']->addMessage("Adding Editor-<div>");
         }
         return;
     }
@@ -135,7 +142,6 @@ class FredPlugin extends Plugin
     * update content
     * save page
     * 
-    * @param Page Page that has to be saved
     * @return void - calls ajaxoutput
     */
     public function savePage() {
@@ -144,18 +150,8 @@ class FredPlugin extends Plugin
         
         // Check Permissions for Save
         if ($user->authenticated && $user->authorize("site.editor")) {
-            // Get pages object and initialize
-            $pages = $this->grav['pages'];
-            $pages->init();
+            $page = $this->getPage("uri");
             
-            // Filter uri from parameters
-            $uri_string = filter_input(INPUT_POST, "uri", FILTER_SANITIZE_SPECIAL_CHARS);
-            // Parse uri to get the plain path 
-            $uri = parse_url($uri_string);
-            
-            // get the page connected with $uri.path
-            $page = $pages->dispatch($uri['path']);
-
             // get changes
             // TODO preapre multipage content
             $blogItem = filter_input(INPUT_POST, "blog_item", FILTER_SANITIZE_SPECIAL_CHARS);
@@ -179,6 +175,91 @@ class FredPlugin extends Plugin
         die;
     }
     
+    /**
+    * Handles files upload 
+    * Triggerd vie upload-image.json 
+    * 
+    * @param void
+    * @return void - creates json - output for ajax
+    */
+    public function addFile() {
+        $user = $this->grav['user'];
+        
+        // Check Permissions for Save
+        if ($user->authenticated && $user->authorize("site.editor")) {
+            $page = $this->getPage("uri");
+
+            /** @var Config $config */
+            $config = $this->grav['config'];
+            if (!isset($_FILES['file']['error']) || is_array($_FILES['file']['error'])) {
+                $this->json_response = ['status' => 'error', 'message' => "Invalid Parameters"];
+                return false;
+            }
+            // Check $_FILES['file']['error'] value.
+            switch ($_FILES['file']['error']) {
+                case UPLOAD_ERR_OK:
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    $this->json_response = ['status' => 'error', 'message' => "No file error"];
+                    return false;
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    $this->json_response = ['status' => 'error', 'message' => "Filesize error"];
+                    return false;
+                default:
+                    $this->json_response = ['status' => 'error', 'message' => "Unkown error"];
+                    return false;
+            }
+            $grav_limit = $config->get('system.media.upload_limit', 0);
+            // You should also check filesize here.
+            if ($grav_limit > 0 && $_FILES['file']['size'] > $grav_limit) {
+                $this->json_response = ['status' => 'error', 'message' => "File to big"];
+                return false;
+            }
+            // Check extension
+            $fileParts = pathinfo($_FILES['file']['name']);
+            $fileExt = '';
+            if (isset($fileParts['extension'])) {
+                $fileExt = strtolower($fileParts['extension']);
+            }
+            // If not a supported type, return
+            if (!$fileExt || !$config->get("media.{$fileExt}")) {
+                $this->json_response = ['status' => 'error', 'message' => 'Invalid filetype: '.$fileExt];
+                return false;
+            }
+            // Upload it
+            $imagefile = sprintf('%s/%s', $page->path(), $_FILES['file']['name']);
+            if (!move_uploaded_file($_FILES['file']['tmp_name'], $imagefile)) {
+                $this->json_response = ['status' => 'error', 'message' => 'Failed to move file'];
+                return false;
+            }
+            // Get image Size
+            $size = getimagesize($imagefile);
+            $this->json_response = ['status' => 'success', 'url' => sprintf('%s/%s', $page->route(), $_FILES['file']['name']), 'size'=> [$size[0], $size[1]] , 'message' => 'Upload successfull'];
+            
+            echo json_encode($this->json_response);
+            die;
+        }    
+    }
     
-    
+    /**
+    * Get page from POST parameter
+    *
+    * @param string POST field to get URI from 
+    * @return Page object
+    */
+    protected function getPage($param) {
+        // Get pages object and initialize
+        $pages = $this->grav['pages'];
+        $pages->init();
+        
+        // Filter uri from parameters
+        $uri_string = filter_input(INPUT_POST, $param, FILTER_SANITIZE_SPECIAL_CHARS);
+        // Parse uri to get the plain path 
+        $uri = parse_url($uri_string);
+        
+        // get the page connected with $uri.path
+        $page = $pages->dispatch($uri['path']);
+        return $page;
+    }
 }

@@ -12,17 +12,14 @@ Frontend editing for Grav using contenttools or prosemirror
 
 
 ## TODOs
-- decide which editor is the best
- - http://getcontenttools.com/
- - http://prosemirror.net/
- - https://github.com/IonicaBizau/medium-editor-markdown
+- image croping  in dialog
 - invesitgate
  - make sure only markdown content is edited? Or what about twig content?
+ - Edit Page title/headline
  - how to edit multi-language pages
  - how to edit modular pages
  - how to add site.editor access to users
  - how to best login users on frontend
- - allow file/image upload
 
 ### Other Things
 - Issue on grav-admin https://github.com/getgrav/grav-plugin-admin/issues/173
@@ -34,7 +31,7 @@ Frontend editing for Grav using contenttools or prosemirror
 - use login-Plugin and access:site.editor for user authentification
 - warp javascript in a closure function and autoload on jQuery-pageready 
 - save changes to .md file
-
+- Image upload and rotation via upload-dialog
 
 ### Used Libs:
 - https://github.com/domchristie/to-markdown

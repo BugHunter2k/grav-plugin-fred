@@ -76,7 +76,8 @@
 
             // Build the form data to post to the server
             formData = new FormData();
-            formData.append('image', file);
+            formData.append('file', file);
+            formData.append('uri', window.location.href);
 
             // Make the request
             xhr = new XMLHttpRequest();
@@ -86,131 +87,61 @@
             xhr.send(formData);
         });
         
-        // TODO Check if usage of medium-functions is propable here to 
-        //      so we dont't need to create our own functions for that 
-        function rotateImage(direction) {
-            // Request a rotated version of the image from the server
-            var formData;
-
-            // Define a function to handle the request completion
-            xhrComplete = function (ev) {
-                var response;
-
-                // Check the request is complete
-                if (ev.target.readyState != 4) {
-                    return;
-                }
-
-                // Clear the request
-                xhr = null
-                xhrComplete = null
-
-                // Free the dialog from its busy state
-                dialog.busy(false);
-
-                // Handle the result of the rotation
-                if (parseInt(ev.target.status) == 200) {
-                    // Unpack the response (from JSON)
-                    response = JSON.parse(ev.target.responseText);
-
-                    // Store the image details (use fake param to force refresh)
-                    image = {
-                        size: response.size,
-                        url: response.url + '?_ignore=' + Date.now()
-                        };
-
-                    // Populate the dialog
-                    dialog.populate(image.url, image.size);
-
-                } else {
-                    // The request failed, notify the user
-                    new ContentTools.FlashUI('no');
-                }
+        // While grav media is capable to rotat images, all we have to 
+        // do here is append or replace the rotate parameter to the imageurl
+        function rotateImage(rotation) {
+            // Check if rotation is set 
+            if (image.url.indexOf("rotate") > 0) {
+                // Get current rotation 
+                var regex = /(?:\?|&)rotate=(-?\d+)(?:&|$)/i;
+                var match = regex.exec(image.url);
+                rotation = +match[1]+rotation;
+                // Correct angel 
+                rotation %= 360;
+                // replace parameter
+                image.url = image.url.replace(/(rotate=).*?(&|$)/,'$1' + rotation + '$2');
+            } else {
+                // get divider 
+                var divider = image.url.indexOf("?") > 0?'&':'?';
+                // append rotation parameter
+                image.url += divider+"rotate="+rotation; 
             }
+            // swap size values
+            image.size = [image.size[1],image.size[0]];
 
-            // Set the dialog to busy while the rotate is performed
-            dialog.busy(true);
-
-            // Build the form data to post to the server
-            formData = new FormData();
-            formData.append('url', image.url);
-            formData.append('direction', direction);
-
-            // Make the request
-            xhr = new XMLHttpRequest();
-            xhr.addEventListener('readystatechange', xhrComplete);
-            xhr.open('POST', '/rotate-image', true);
-            xhr.send(formData);
+            // Populate the dialog
+            dialog.populate(image.url, image.size);
         }
-        
+
         dialog.bind('imageUploader.rotateCCW', function () {
-            // TODO my be only a new image location has to be returned with rotate=90
-            rotateImage('CCW');
+            rotateImage(90);
         });
 
         dialog.bind('imageUploader.rotateCW', function () {
-            // TODO my be only a new image location has to be returned with rotate=-90
-            rotateImage('CW');
+            rotateImage(-90);
         });
+        
         dialog.bind('imageUploader.save', function () {
+            // TODO implement Cropping
             var crop, cropRegion, formData;
-
-            // Define a function to handle the request completion
-            xhrComplete = function (ev) {
-                // Check the request is complete
-                if (ev.target.readyState !== 4) {
-                    return;
-                }
-
-                // Clear the request
-                xhr = null
-                xhrComplete = null
-
-                // Free the dialog from its busy state
-                dialog.busy(false);
-
-                // Handle the result of the rotation
-                if (parseInt(ev.target.status) === 200) {
-                    // Unpack the response (from JSON)
-                    var response = JSON.parse(ev.target.responseText);
-
-                    // Trigger the save event against the dialog with details of the
-                    // image to be inserted.
+            // Just set the Parameters for
+            // image to be inserted.
                     dialog.save(
-                        response.url,
-                        response.size,
+                        image.url,
+                        image.size,
                         {
-                            'alt': response.alt,
+                            'alt': image.alt,
                             'data-ce-max-width': image.size[0]
                         });
 
-                } else {
-                    // The request failed, notify the user
-                    new ContentTools.FlashUI('no');
-                }
-            }
-
-            // Set the dialog to busy while the rotate is performed
+            // Set the dialog to busy while the save is performed
             dialog.busy(true);
-
-            // Build the form data to post to the server
-            formData = new FormData();
-            formData.append('url', image.url);
-
-            // Set the width of the image when it's inserted, this is a default
-            // the user will be able to resize the image afterwards.
-            formData.append('width', 600);
 
             // Check if a crop region has been defined by the user
             if (dialog.cropRegion()) {
+                // TODO
                 formData.append('crop', dialog.cropRegion());
             }
-
-            // Make the request
-            xhr = new XMLHttpRequest();
-            xhr.addEventListener('readystatechange', xhrComplete);
-            xhr.open('POST', '/insert-image', true);
-            xhr.send(formData);
         });
     }
         
