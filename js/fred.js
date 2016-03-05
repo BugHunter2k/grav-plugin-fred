@@ -149,18 +149,27 @@
     // Holds the fred methods
     var fred = {
         init: function() {
+            // To properly handle image with content-tools 
+            // we have to append width and height attributes to them
+            $('*[data-editable] img').each(function() {
+                $(this).attr('data-ce-tag', "img");
+            });
+            
             // Init the ContentTools Editor on all elements
             // with data-editable attribute
             editor = ContentTools.EditorApp.get();
             editor.init('*[data-editable]', 'data-name');
             editor.bind('save', this.save);
             ContentTools.IMAGE_UPLOADER = ImageUploader;
+
         },
         save: function(regions) {
             // callback for ContentTools for sending changes
             console.log("saving regions:", regions);
             // TODO convert ALL parts into markdown
             // NOTE Check for changes is done by contenttools
+            // TODO images has to be saved in correct md way
+            // actual these are save wrong
             var markdown = toMarkdown(regions.blog_item)
             // Send changes to Server
             $.ajax( {

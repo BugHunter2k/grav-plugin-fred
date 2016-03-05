@@ -124,7 +124,7 @@ class FredPlugin extends Plugin
         $page = $e->offsetGet('page');
         if ($page->isPage() && $page->route() == $this->grav['uri']->path() ) {
             $page->content('<div data-editable="true" data-name="blog_item">'.$page->content().'</div>');
-            $this->grav['debugger']->addMessage("Adding Editor-<div>");
+            $this->grav['debugger']->addMessage("[fred] Adding Editor-<div>");
         }
         return;
     }
