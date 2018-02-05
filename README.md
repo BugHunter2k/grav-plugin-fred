@@ -10,6 +10,16 @@ Frontend editing for Grav using contenttools
 * Goto any blog-page and klcik on the blue pencil-icon in the upper left corner.
 * Edit Content, finish with green checkmark button and the changes are written to .md-file
 
+## Set-Up 
+To use this Plugin one have to add access-rights to an user and log in from the frontend of your site.
+Add to /user/accounts/USER.yaml:
+```
+access:
+  site:
+    login: true
+    editor: true
+```
+After adding got to: .../user-login to log into the frontend. Then there should be the pencil icon.
 
 ## TODOs
 - image croping  in dialog
